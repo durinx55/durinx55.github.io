@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dante Bonessi — Geometry automation for 3D-printed custom products</title>
+<meta name="description" content="I build pipelines that turn artwork into print-ready multicolor 3D files, so custom orders don't need manual CAD.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* filament chips — the palette is literally the demo piece */
+  --f-blue:#1E4FB8;
+  --f-red:#CE2A22;
+  --f-brown:#7A5230;
+  --f-skin:#EFC098;
+  --f-amber:#E0A33A;
+
+  --plate:#E2E6E3;      /* PEI build plate, cool grey-green */
+  --paper:#F7F8F7;
+  --ink:#121619;
+  --ink-soft:#4A5157;
+  --rule:#C7CEC9;
+
+  --measure:64ch;
+  --pad:clamp(1.25rem,5vw,4rem);
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--plate);
+  color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,sans-serif;
+  font-size:clamp(1rem,0.95rem + 0.25vw,1.125rem);
+  line-height:1.6;
+  font-variant-numeric:tabular-nums;
+}
+h1,h2,h3{font-family:"Bricolage Grotesque","IBM Plex Sans",sans-serif;font-weight:700;line-height:1.02;margin:0;letter-spacing:-0.02em}
+p{margin:0 0 1em;max-width:var(--measure)}
+a{color:inherit}
+img{max-width:100%;display:block}
+
+.wrap{max-width:1180px;margin:0 auto;padding-inline:var(--pad)}
+
+/* ---------- the recurring structural device: a stacked-layer rule ---------- */
+.stack-rule{display:flex;height:6px;width:100%;margin:0}
+.stack-rule i{flex:1}
+.stack-rule i:nth-child(1){background:var(--f-blue)}
+.stack-rule i:nth-child(2){background:var(--f-brown)}
+.stack-rule i:nth-child(3){background:var(--f-red)}
+.stack-rule i:nth-child(4){background:var(--f-skin)}
+.stack-rule i:nth-child(5){background:var(--f-amber)}
+
+/* ---------- top bar ---------- */
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;padding-block:1.5rem 0;flex-wrap:wrap}
+.wordmark{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:1.05rem;letter-spacing:-0.01em}
+.wordmark span{color:var(--ink-soft);font-weight:500}
+.langbtn{
+  font:inherit;font-size:0.85rem;font-weight:600;cursor:pointer;
+  background:transparent;border:1.5px solid var(--ink);border-radius:2px;
+  padding:0.3rem 0.7rem;color:var(--ink);
+}
+.langbtn:hover{background:var(--ink);color:var(--plate)}
+
+/* ---------- hero ---------- */
+.hero{display:grid;grid-template-columns:1fr;gap:clamp(2rem,5vw,3.5rem);align-items:center;padding-block:clamp(2.5rem,7vw,5rem) clamp(3rem,8vw,6rem)}
+@media(min-width:900px){.hero{grid-template-columns:1.05fr 0.95fr}}
+.hero h1{font-size:clamp(2.3rem,1.2rem + 4.2vw,4.1rem);max-width:16ch}
+.lede{font-size:clamp(1.05rem,1rem + 0.4vw,1.3rem);color:var(--ink-soft);margin-top:1.4rem;max-width:46ch}
+.hero-fig{position:relative}
+.hero-fig img{border-radius:3px;box-shadow:0 24px 50px -28px rgba(18,22,25,.55)}
+.hero-cap{
+  font-size:0.82rem;color:var(--ink-soft);margin-top:0.7rem;max-width:38ch;
+}
+
+/* the before/after strip */
+.swap{margin-top:2.2rem;border-top:1.5px solid var(--ink);padding-top:1rem;display:grid;gap:0.9rem;max-width:44ch}
+@media(min-width:520px){.swap{grid-template-columns:1fr 1fr;gap:1.6rem}}
+.swap div{font-size:0.95rem}
+.swap b{display:block;font-family:"Bricolage Grotesque",sans-serif;font-size:1.9rem;line-height:1;letter-spacing:-0.02em}
+.swap .was b{color:var(--ink-soft);text-decoration:line-through;text-decoration-thickness:2px}
+.swap .now b{color:var(--f-red)}
+.swap small{display:block;color:var(--ink-soft);margin-top:0.25rem}
+
+/* ---------- sections ---------- */
+section{padding-block:clamp(3rem,7vw,5.5rem)}
+.band{background:var(--paper)}
+h2{font-size:clamp(1.6rem,1.2rem + 1.6vw,2.4rem);max-width:20ch;margin-bottom:1.5rem}
+.sub{color:var(--ink-soft);max-width:58ch;margin-bottom:2.5rem}
+
+/* numbered sequence — used only where content really is a sequence */
+ol.steps{list-style:none;margin:0;padding:0;display:grid;gap:0;counter-reset:s;max-width:var(--measure)}
+ol.steps li{
+  counter-increment:s;display:grid;grid-template-columns:2.6rem 1fr;gap:1rem;
+  padding:1.1rem 0;border-top:1px solid var(--rule);
+}
+ol.steps li:last-child{border-bottom:1px solid var(--rule)}
+ol.steps li::before{
+  content:counter(s);font-family:"Bricolage Grotesque",sans-serif;font-weight:700;
+  font-size:1.1rem;color:var(--ink-soft);padding-top:0.1rem;
+}
+ol.steps b{display:block;font-weight:600}
+ol.steps span{color:var(--ink-soft);font-size:0.95rem}
+
+/* pipeline, marked with filament chips */
+ul.pipe{list-style:none;margin:0;padding:0;display:grid;gap:0;max-width:var(--measure)}
+ul.pipe li{display:grid;grid-template-columns:0.8rem 1fr;gap:1.1rem;padding:1.05rem 0;border-top:1px solid var(--rule)}
+ul.pipe li:last-child{border-bottom:1px solid var(--rule)}
+ul.pipe li::before{content:"";display:block;height:100%;min-height:1.5rem;border-radius:1px}
+ul.pipe li:nth-child(1)::before{background:var(--f-blue)}
+ul.pipe li:nth-child(2)::before{background:var(--f-brown)}
+ul.pipe li:nth-child(3)::before{background:var(--f-red)}
+ul.pipe li:nth-child(4)::before{background:var(--f-skin)}
+ul.pipe li:nth-child(5)::before{background:var(--f-amber)}
+ul.pipe b{display:block;font-weight:600}
+ul.pipe span{color:var(--ink-soft);font-size:0.95rem}
+
+/* proof figures */
+.figs{display:grid;gap:2.5rem}
+@media(min-width:820px){.figs{grid-template-columns:1fr 1fr}}
+figure{margin:0}
+figure img{border:1px solid var(--rule);border-radius:3px}
+figcaption{font-size:0.88rem;color:var(--ink-soft);margin-top:0.7rem;max-width:46ch}
+figcaption b{color:var(--ink);font-weight:600}
+.fig-wide{grid-column:1/-1}
+
+/* catches */
+.catches{display:grid;gap:1.6rem;max-width:var(--measure)}
+@media(min-width:700px){.catches{grid-template-columns:repeat(3,1fr);gap:2rem;max-width:none}}
+.catch{border-top:3px solid var(--f-red);padding-top:0.9rem}
+.catch b{display:block;font-weight:600;margin-bottom:0.3rem}
+.catch span{color:var(--ink-soft);font-size:0.93rem}
+
+/* stack chips */
+.chips{display:flex;flex-wrap:wrap;gap:0.45rem;margin-top:1.5rem;padding:0;list-style:none}
+.chips li{
+  font-size:0.85rem;font-weight:500;border:1px solid var(--rule);
+  background:var(--paper);padding:0.28rem 0.6rem;border-radius:2px;
+}
+
+/* second project */
+.aside{border-left:3px solid var(--f-blue);padding-left:1.4rem;max-width:var(--measure)}
+.aside h3{font-size:1.25rem;margin-bottom:0.5rem}
+
+/* contact */
+.contact{background:var(--ink);color:var(--plate)}
+.contact h2{color:#fff;max-width:24ch}
+.contact p{color:#B9C1C6}
+.mail{
+  display:inline-block;margin-top:1rem;font-family:"Bricolage Grotesque",sans-serif;
+  font-weight:700;font-size:clamp(1.1rem,0.9rem + 1.2vw,1.9rem);
+  color:#fff;text-decoration:none;border-bottom:3px solid var(--f-red);padding-bottom:0.15rem;
+  letter-spacing:-0.01em;word-break:break-all;
+}
+.mail:hover{border-bottom-color:#fff}
+.contact .meta{margin-top:2.5rem;font-size:0.88rem;color:#8A9298}
+
+/* load-in: one orchestrated moment, nothing else moves */
+.fade{opacity:0;transform:translateY(10px);animation:in .7s cubic-bezier(.2,.7,.3,1) forwards}
+.fade:nth-child(2){animation-delay:.08s}
+.hero-fig{opacity:0;animation:in .8s cubic-bezier(.2,.7,.3,1) .16s forwards}
+@keyframes in{to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){
+  .fade,.hero-fig{animation:none;opacity:1;transform:none}
+}
+:focus-visible{outline:3px solid var(--f-red);outline-offset:2px}
+</style>
+</head>
+<body>
+
+<div class="stack-rule" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+
+<header class="wrap top">
+  <div class="wordmark">Dante Bonessi <span data-en="— San Rafael, Argentina" data-es="— San Rafael, Argentina">— San Rafael, Argentina</span></div>
+  <button class="langbtn" id="lang" type="button">Leer en español</button>
+</header>
+
+<main>
+<div class="wrap hero">
+  <div>
+    <h1 class="fade"
+        data-en="Artwork in. Print-ready multicolor file out. No CAD in between."
+        data-es="Entra un dibujo. Sale un archivo multicolor listo para imprimir. Sin CAD en el medio.">Artwork in. Print-ready multicolor file out. No CAD in between.</h1>
+    <p class="lede fade"
+       data-en="I build the software that removes manual modelling from custom 3D-printed product orders — parametric generators, image-to-geometry pipelines and print-ready file export."
+       data-es="Construyo el software que saca el modelado manual de los pedidos de productos impresos a medida — generadores paramétricos, pipelines de imagen a geometría y exportación de archivos listos para imprimir.">I build the software that removes manual modelling from custom 3D-printed product orders — parametric generators, image-to-geometry pipelines and print-ready file export.</p>
+
+    <div class="swap fade">
+      <div class="was">
+        <b>~60 min</b>
+        <small data-en="per piece, by hand: trace in Illustrator, then stack every colour region in Fusion 360."
+               data-es="por pieza, a mano: vectorizar en Illustrator y apilar cada región de color en Fusion 360.">per piece, by hand: trace in Illustrator, then stack every colour region in Fusion 360.</small>
+      </div>
+      <div class="now">
+        <b data-en="Seconds" data-es="Segundos">Seconds</b>
+        <small data-en="per piece, automated: drop the image, adjust, export a multi-part 3MF."
+               data-es="por pieza, automatizado: arrastrás la imagen, ajustás y exportás un 3MF multiparte.">per piece, automated: drop the image, adjust, export a multi-part 3MF.</small>
+      </div>
+    </div>
+  </div>
+
+  <figure class="hero-fig">
+    <img src="img/capas-explosion.jpg" width="742" height="701"
+         alt="Exploded view of a round keychain: each colour region is a separate solid stacked onto the body.">
+    <figcaption class="hero-cap"
+      data-en="Every colour becomes its own closed solid, each one resting on the geometry below it — never floating."
+      data-es="Cada color es un sólido cerrado propio, apoyado sobre la geometría de abajo — nunca flotando.">Every colour becomes its own closed solid, each one resting on the geometry below it — never floating.</figcaption>
+  </figure>
+</div>
+
+<section class="band">
+  <div class="wrap">
+    <h2 data-en="The bottleneck this removes" data-es="El cuello de botella que elimina">The bottleneck this removes</h2>
+    <p class="sub"
+       data-en="Every shop selling personalised printed products hits the same wall: the order arrives as a picture, and the printer needs geometry. Somebody bridges that gap by hand, once per order."
+       data-es="Todo negocio que vende productos impresos personalizados choca con lo mismo: el pedido llega como una imagen y la impresora necesita geometría. Alguien cruza ese puente a mano, una vez por pedido.">Every shop selling personalised printed products hits the same wall: the order arrives as a picture, and the printer needs geometry. Somebody bridges that gap by hand, once per order.</p>
+    <ol class="steps">
+      <li><b data-en="Clean up the customer artwork" data-es="Limpiar el arte del cliente">Clean up the customer artwork</b>
+          <span data-en="Flatten gradients, fix outlines, decide what survives at nozzle width."
+                data-es="Aplanar degradados, arreglar contornos, decidir qué sobrevive al ancho de boquilla.">Flatten gradients, fix outlines, decide what survives at nozzle width.</span></li>
+      <li><b data-en="Trace it into vectors" data-es="Vectorizarlo">Trace it into vectors</b>
+          <span data-en="One clean path set per colour region, in Illustrator or Inkscape."
+                data-es="Un juego de trazados limpio por región de color, en Illustrator o Inkscape.">One clean path set per colour region, in Illustrator or Inkscape.</span></li>
+      <li><b data-en="Rebuild it as solids in CAD" data-es="Reconstruirlo como sólidos en CAD">Rebuild it as solids in CAD</b>
+          <span data-en="Import, extrude and stack every region so no colour floats in mid-air."
+                data-es="Importar, extruir y apilar cada región para que ningún color quede flotando.">Import, extrude and stack every region so no colour floats in mid-air.</span></li>
+      <li><b data-en="Export and hope it slices" data-es="Exportar y cruzar los dedos">Export and hope it slices</b>
+          <span data-en="Separate meshes with mismatched origins, reassembled by hand in the slicer."
+                data-es="Mallas separadas con orígenes distintos, rearmadas a mano en el slicer.">Separate meshes with mismatched origins, reassembled by hand in the slicer.</span></li>
+    </ol>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2 data-en="TokenGen: the pipeline, end to end" data-es="TokenGen: el pipeline, de punta a punta">TokenGen: the pipeline, end to end</h2>
+    <p class="sub"
+       data-en="A desktop tool that runs fully offline. It takes a flat image or SVG and produces a multi-part 3MF that an AMS or MMU slicer opens with one filament already assigned per part."
+       data-es="Una herramienta de escritorio que corre 100% offline. Toma una imagen plana o un SVG y produce un 3MF multiparte que un slicer AMS o MMU abre con un filamento ya asignado por parte.">A desktop tool that runs fully offline. It takes a flat image or SVG and produces a multi-part 3MF that an AMS or MMU slicer opens with one filament already assigned per part.</p>
+    <ul class="pipe">
+      <li><b data-en="Colour separation" data-es="Separación de colores">Colour separation</b>
+          <span data-en="Quantises the image into flat regions, one mask per colour, with denoise and speckle controls for photographs."
+                data-es="Cuantiza la imagen en regiones planas, una máscara por color, con controles de suavizado y mota para fotos.">Quantises the image into flat regions, one mask per colour, with denoise and speckle controls for photographs.</span></li>
+      <li><b data-en="Per-mask vectorisation" data-es="Vectorización por máscara">Per-mask vectorisation</b>
+          <span data-en="Each mask is traced separately, which keeps the layer count deterministic and controllable."
+                data-es="Cada máscara se traza por separado, lo que mantiene la cantidad de capas determinista y controlable.">Each mask is traced separately, which keeps the layer count deterministic and controllable.</span></li>
+      <li><b data-en="Cumulative stacking" data-es="Apilado acumulativo">Cumulative stacking</b>
+          <span data-en="The footprint extruded at each level is that colour plus every colour above it, so each layer physically rests on the one below."
+                data-es="La huella extruida en cada nivel es ese color más todos los de arriba, así cada capa apoya físicamente sobre la anterior.">The footprint extruded at each level is that colour plus every colour above it, so each layer physically rests on the one below.</span></li>
+      <li><b data-en="Parametric base" data-es="Base paramétrica">Parametric base</b>
+          <span data-en="Outline, thickness, hole, bevel, safe area and relief ceiling are all inputs. Bases can be drawn as SVG or measured automatically from an STL or 3MF."
+                data-es="Contorno, espesor, agujero, bisel, zona útil y tope de relieve son parámetros. Las bases se dibujan en SVG o se miden solas desde un STL o 3MF.">Outline, thickness, hole, bevel, safe area and relief ceiling are all inputs. Bases can be drawn as SVG or measured automatically from an STL or 3MF.</span></li>
+      <li><b data-en="Print-ready export" data-es="Exportación lista para imprimir">Print-ready export</b>
+          <span data-en="Multi-part 3MF, one STL per colour as a fallback, and a top-view preview. Plus grams per colour and the filament-swap count for a single-extruder printer."
+                data-es="3MF multiparte, un STL por color como respaldo y un preview en planta. Más gramos por color y la cantidad de cambios de filamento en una impresora de un solo extrusor.">Multi-part 3MF, one STL per colour as a fallback, and a top-view preview. Plus grams per colour and the filament-swap count for a single-extruder printer.</span></li>
+    </ul>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <h2 data-en="What it looks like in use" data-es="Cómo se ve funcionando">What it looks like in use</h2>
+    <div class="figs">
+      <figure>
+        <img src="img/ui-validacion.jpg" width="1584" height="728"
+             alt="TokenGen interface: colour layer list with per-layer heights, a live 3D preview and a warning message above the viewer.">
+        <figcaption data-en="&lt;b&gt;Live editing.&lt;/b&gt; Reorder colours, set how far each one stands proud in millimetres, and see the result immediately. Warnings that change the printed part appear over the viewer, not buried in a list."
+                    data-es="&lt;b&gt;Edición en vivo.&lt;/b&gt; Reordenás colores, definís cuánto sobresale cada uno en milímetros y ves el resultado al instante. Los avisos que cambian la pieza impresa aparecen sobre el visor, no enterrados en una lista."><b>Live editing.</b> Reorder colours, set how far each one stands proud in millimetres, and see the result immediately. Warnings that change the printed part appear over the viewer, not buried in a list.</figcaption>
+      </figure>
+      <figure>
+        <img src="img/slicer-partes.jpg" width="1600" height="856"
+             alt="The exported 3MF opened in a slicer, showing the piece split into named parts with filaments assigned.">
+        <figcaption data-en="&lt;b&gt;Straight into the slicer.&lt;/b&gt; The exported 3MF arrives as an assembly of named parts, correctly aligned, ready for filament assignment. No re-registering separate meshes by hand."
+                    data-es="&lt;b&gt;Directo al slicer.&lt;/b&gt; El 3MF exportado llega como ensamblaje de partes con nombre, alineadas, listas para asignarles filamento. Sin rearmar mallas sueltas a mano."><b>Straight into the slicer.</b> The exported 3MF arrives as an assembly of named parts, correctly aligned, ready for filament assignment. No re-registering separate meshes by hand.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2 data-en="It catches the failures before the printer does" data-es="Detecta las fallas antes que la impresora">It catches the failures before the printer does</h2>
+    <div class="catches">
+      <div class="catch">
+        <b data-en="Impossible stacking orders" data-es="Órdenes de apilado imposibles">Impossible stacking orders</b>
+        <span data-en="Region adjacency analysis flags colour orders that cannot physically stack, before you print them."
+              data-es="El análisis de adyacencia entre regiones marca los órdenes de color que no pueden apilarse físicamente, antes de imprimir.">Region adjacency analysis flags colour orders that cannot physically stack, before you print them.</span>
+      </div>
+      <div class="catch">
+        <b data-en="Hairline gaps" data-es="Micro-huecos">Hairline gaps</b>
+        <span data-en="Adjacent regions get a small outward offset before the union, so vectorisation rounding doesn't leave visible seams."
+              data-es="Las regiones adyacentes reciben un pequeño offset hacia afuera antes de la unión, para que el redondeo de la vectorización no deje costuras visibles.">Adjacent regions get a small outward offset before the union, so vectorisation rounding doesn't leave visible seams.</span>
+      </div>
+      <div class="catch">
+        <b data-en="Detail finer than the nozzle" data-es="Detalle más fino que la boquilla">Detail finer than the nozzle</b>
+        <span data-en="A negative offset test highlights, in red on the flat view, every feature too thin to survive at extrusion width."
+              data-es="Un test de offset negativo resalta en rojo, sobre la vista en planta, cada detalle demasiado fino para sobrevivir al ancho de extrusión.">A negative offset test highlights, in red on the flat view, every feature too thin to survive at extrusion width.</span>
+      </div>
+    </div>
+
+    <h2 style="margin-top:3.5rem" data-en="Built on" data-es="Construido con">Built on</h2>
+    <p data-en="Python, with shapely for the 2D boolean work, vtracer for vectorisation, trimesh and mapbox_earcut for extrusion, and a hand-written 3MF exporter. The interface is a local server with a Three.js viewer, so nothing leaves the machine. The geometric invariants — every layer fully supported, heights chaining without gaps, every mesh watertight with consistent normals — are covered by an automated test suite."
+       data-es="Python, con shapely para las booleanas 2D, vtracer para la vectorización, trimesh y mapbox_earcut para la extrusión, y un exportador 3MF escrito a mano. La interfaz es un servidor local con visor Three.js, así que nada sale de la máquina. Los invariantes geométricos —cada capa apoyada por completo, alturas que encadenan sin huecos, mallas estancas con normales consistentes— están cubiertos por una batería de tests automáticos.">Python, with shapely for the 2D boolean work, vtracer for vectorisation, trimesh and mapbox_earcut for extrusion, and a hand-written 3MF exporter. The interface is a local server with a Three.js viewer, so nothing leaves the machine. The geometric invariants — every layer fully supported, heights chaining without gaps, every mesh watertight with consistent normals — are covered by an automated test suite.</p>
+    <ul class="chips">
+      <li>Python</li><li>shapely</li><li>trimesh</li><li>vtracer</li><li>numpy</li>
+      <li>Pillow</li><li>3MF</li><li>Three.js</li><li>OpenSCAD-WASM</li><li>Fusion 360</li>
+    </ul>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <div class="aside">
+      <h3>HEXBOARD</h3>
+      <p data-en="The same idea in the browser: a parametric configurator where the customer sets the dimensions and the geometry is generated live with OpenSCAD-WASM, then downloaded as a printable model. No server, no CAD seat, no designer in the loop."
+         data-es="La misma idea en el navegador: un configurador paramétrico donde el cliente define las medidas y la geometría se genera en vivo con OpenSCAD-WASM, para descargarla como modelo imprimible. Sin servidor, sin licencia de CAD, sin diseñador en el medio.">The same idea in the browser: a parametric configurator where the customer sets the dimensions and the geometry is generated live with OpenSCAD-WASM, then downloaded as a printable model. No server, no CAD seat, no designer in the loop.</p>
+    </div>
+  </div>
+</section>
+
+<section class="contact">
+  <div class="wrap">
+    <h2 data-en="If your team designs each custom order by hand, that step can be code."
+        data-es="Si tu equipo diseña cada pedido a mano, ese paso puede ser código.">If your team designs each custom order by hand, that step can be code.</h2>
+    <p data-en="I work with print farms, personalised-product shops and configurator teams — building the generator, integrating it with the order flow, or licensing an existing pipeline. Tell me what your current per-order process looks like and I'll tell you what can be automated."
+       data-es="Trabajo con print farms, negocios de productos personalizados y equipos de configuradores — construyendo el generador, integrándolo al flujo de pedidos o licenciando un pipeline existente. Contame cómo es hoy tu proceso por pedido y te digo qué se puede automatizar.">I work with print farms, personalised-product shops and configurator teams — building the generator, integrating it with the order flow, or licensing an existing pipeline. Tell me what your current per-order process looks like and I'll tell you what can be automated.</p>
+    <a class="mail" href="mailto:dantebonessi14@gmail.com">dantebonessi14@gmail.com</a>
+    <div class="meta" data-en="Dante Bonessi — San Rafael, Mendoza, Argentina. Working in English and Spanish."
+         data-es="Dante Bonessi — San Rafael, Mendoza, Argentina. Trabajo en inglés y español.">Dante Bonessi — San Rafael, Mendoza, Argentina. Working in English and Spanish.</div>
+  </div>
+</section>
+</main>
+
+<div class="stack-rule" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+
+<script>
+(function(){
+  var lang='en';
+  var btn=document.getElementById('lang');
+  var nodes=document.querySelectorAll('[data-en]');
+  btn.addEventListener('click',function(){
+    lang = (lang==='en') ? 'es' : 'en';
+    document.documentElement.lang = lang;
+    nodes.forEach(function(n){ n.innerHTML = n.getAttribute('data-'+lang); });
+    btn.textContent = (lang==='en') ? 'Leer en español' : 'Read in English';
+  });
+})();
+</script>
+</body>
+</html>
