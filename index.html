@@ -3,8 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dante Bonessi — Geometry automation for 3D-printed custom products</title>
-<meta name="description" content="I build pipelines that turn artwork into print-ready multicolor 3D files, so custom orders don't need manual CAD.">
+<title data-en="Dante Bonessi — Geometry automation for 3D-printed custom products"
+       data-es="Dante Bonessi — Automatización de geometría para productos impresos en 3D">Dante Bonessi — Geometry automation for 3D-printed custom products</title>
+<meta name="description" id="metadesc"
+      data-en="I build pipelines that turn artwork into print-ready multicolor 3D files, so custom orders don't need manual CAD."
+      data-es="Construyo pipelines que convierten un dibujo en archivos 3D multicolor listos para imprimir, sin CAD manual por pedido."
+      content="I build pipelines that turn artwork into print-ready multicolor 3D files, so custom orders don't need manual CAD.">
+<link rel="canonical" href="https://durinx55.github.io/">
+<meta name="theme-color" content="#E2E6E3">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://durinx55.github.io/">
+<meta property="og:title" content="Artwork in. Print-ready multicolor file out. No CAD in between.">
+<meta property="og:description" content="Geometry automation for 3D-printed custom products: parametric generators, image-to-geometry pipelines and print-ready file export.">
+<meta property="og:image" content="https://durinx55.github.io/img/capas-explosion.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23E2E6E3'/%3E%3Crect y='5' width='32' height='5' fill='%231E4FB8'/%3E%3Crect y='11' width='32' height='5' fill='%237A5230'/%3E%3Crect y='17' width='32' height='5' fill='%23CE2A22'/%3E%3Crect y='23' width='32' height='5' fill='%23E0A33A'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -41,7 +54,7 @@ body{
 h1,h2,h3{font-family:"Bricolage Grotesque","IBM Plex Sans",sans-serif;font-weight:700;line-height:1.02;margin:0;letter-spacing:-0.02em}
 p{margin:0 0 1em;max-width:var(--measure)}
 a{color:inherit}
-img{max-width:100%;display:block}
+img{max-width:100%;height:auto;display:block}
 
 .wrap{max-width:1180px;margin:0 auto;padding-inline:var(--pad)}
 
@@ -64,16 +77,18 @@ img{max-width:100%;display:block}
   padding:0.3rem 0.7rem;color:var(--ink);
 }
 .langbtn:hover{background:var(--ink);color:var(--plate)}
+/* on narrow screens the location repeats in the footer, so drop it and keep one line */
+@media(max-width:26.5em){.wordmark span{display:none}}
 
 /* ---------- hero ---------- */
 .hero{display:grid;grid-template-columns:1fr;gap:clamp(2rem,5vw,3.5rem);align-items:center;padding-block:clamp(2.5rem,7vw,5rem) clamp(3rem,8vw,6rem)}
 @media(min-width:900px){.hero{grid-template-columns:1.05fr 0.95fr}}
-.hero h1{font-size:clamp(2.3rem,1.2rem + 4.2vw,4.1rem);max-width:16ch}
-.lede{font-size:clamp(1.05rem,1rem + 0.4vw,1.3rem);color:var(--ink-soft);margin-top:1.4rem;max-width:46ch}
+.hero h1{font-size:clamp(2.3rem,1.2rem + 4.2vw,4.1rem);max-width:16ch;text-wrap:balance}
+.lede{font-size:clamp(1.05rem,1rem + 0.4vw,1.3rem);color:var(--ink-soft);margin-top:1.4rem;max-width:46ch;text-wrap:pretty}
 .hero-fig{position:relative}
 .hero-fig img{border-radius:3px;box-shadow:0 24px 50px -28px rgba(18,22,25,.55)}
 .hero-cap{
-  font-size:0.82rem;color:var(--ink-soft);margin-top:0.7rem;max-width:38ch;
+  font-size:0.82rem;color:var(--ink-soft);margin-top:0.7rem;max-width:48ch;
 }
 
 /* the before/after strip */
@@ -88,18 +103,21 @@ img{max-width:100%;display:block}
 /* ---------- sections ---------- */
 section{padding-block:clamp(3rem,7vw,5.5rem)}
 .band{background:var(--paper)}
-h2{font-size:clamp(1.6rem,1.2rem + 1.6vw,2.4rem);max-width:20ch;margin-bottom:1.5rem}
+h2{font-size:clamp(1.6rem,1.2rem + 1.6vw,2.4rem);max-width:22ch;margin-bottom:1.5rem;text-wrap:balance}
 .sub{color:var(--ink-soft);max-width:58ch;margin-bottom:2.5rem}
 
 /* numbered sequence — used only where content really is a sequence */
 ol.steps{list-style:none;margin:0;padding:0;display:grid;gap:0;counter-reset:s;max-width:var(--measure)}
 ol.steps li{
-  counter-increment:s;display:grid;grid-template-columns:2.6rem 1fr;gap:1rem;
+  counter-increment:s;display:grid;grid-template-columns:2.6rem minmax(0,1fr);
+  gap:0.2rem 1rem;
   padding:1.1rem 0;border-top:1px solid var(--rule);
 }
+ol.steps li>b,ol.steps li>span{grid-column:2}
 ol.steps li:last-child{border-bottom:1px solid var(--rule)}
 ol.steps li::before{
-  content:counter(s);font-family:"Bricolage Grotesque",sans-serif;font-weight:700;
+  content:counter(s);grid-column:1;grid-row:1/span 2;align-self:start;
+  font-family:"Bricolage Grotesque",sans-serif;font-weight:700;
   font-size:1.1rem;color:var(--ink-soft);padding-top:0.1rem;
 }
 ol.steps b{display:block;font-weight:600}
@@ -107,9 +125,10 @@ ol.steps span{color:var(--ink-soft);font-size:0.95rem}
 
 /* pipeline, marked with filament chips */
 ul.pipe{list-style:none;margin:0;padding:0;display:grid;gap:0;max-width:var(--measure)}
-ul.pipe li{display:grid;grid-template-columns:0.8rem 1fr;gap:1.1rem;padding:1.05rem 0;border-top:1px solid var(--rule)}
+ul.pipe li{display:grid;grid-template-columns:0.8rem minmax(0,1fr);gap:0.2rem 1.1rem;padding:1.05rem 0;border-top:1px solid var(--rule)}
+ul.pipe li>b,ul.pipe li>span{grid-column:2}
 ul.pipe li:last-child{border-bottom:1px solid var(--rule)}
-ul.pipe li::before{content:"";display:block;height:100%;min-height:1.5rem;border-radius:1px}
+ul.pipe li::before{content:"";display:block;grid-column:1;grid-row:1/span 2;align-self:stretch;height:auto;min-height:1.5rem;border-radius:1px}
 ul.pipe li:nth-child(1)::before{background:var(--f-blue)}
 ul.pipe li:nth-child(2)::before{background:var(--f-brown)}
 ul.pipe li:nth-child(3)::before{background:var(--f-red)}
@@ -122,8 +141,10 @@ ul.pipe span{color:var(--ink-soft);font-size:0.95rem}
 .figs{display:grid;gap:2.5rem}
 @media(min-width:820px){.figs{grid-template-columns:1fr 1fr}}
 figure{margin:0}
-figure img{border:1px solid var(--rule);border-radius:3px}
-figcaption{font-size:0.88rem;color:var(--ink-soft);margin-top:0.7rem;max-width:46ch}
+figure img{border:1px solid var(--rule);border-radius:3px;width:100%}
+figcaption{font-size:0.88rem;color:var(--ink-soft);margin-top:0.7rem;max-width:56ch}
+.figs figure{display:flex;flex-direction:column}
+.figs figcaption{margin-top:auto;padding-top:0.9rem}
 figcaption b{color:var(--ink);font-weight:600}
 .fig-wide{grid-column:1/-1}
 
@@ -143,7 +164,7 @@ figcaption b{color:var(--ink);font-weight:600}
 
 /* second project */
 .aside{border-left:3px solid var(--f-blue);padding-left:1.4rem;max-width:var(--measure)}
-.aside h3{font-size:1.25rem;margin-bottom:0.5rem}
+.aside h2{font-size:1.25rem;max-width:none;margin-bottom:0.5rem}
 
 /* contact */
 .contact{background:var(--ink);color:var(--plate)}
@@ -153,7 +174,7 @@ figcaption b{color:var(--ink);font-weight:600}
   display:inline-block;margin-top:1rem;font-family:"Bricolage Grotesque",sans-serif;
   font-weight:700;font-size:clamp(1.1rem,0.9rem + 1.2vw,1.9rem);
   color:#fff;text-decoration:none;border-bottom:3px solid var(--f-red);padding-bottom:0.15rem;
-  letter-spacing:-0.01em;word-break:break-all;
+  letter-spacing:-0.01em;overflow-wrap:anywhere;
 }
 .mail:hover{border-bottom-color:#fff}
 .contact .meta{margin-top:2.5rem;font-size:0.88rem;color:#8A9298}
@@ -161,7 +182,8 @@ figcaption b{color:var(--ink);font-weight:600}
 /* load-in: one orchestrated moment, nothing else moves */
 .fade{opacity:0;transform:translateY(10px);animation:in .7s cubic-bezier(.2,.7,.3,1) forwards}
 .fade:nth-child(2){animation-delay:.08s}
-.hero-fig{opacity:0;animation:in .8s cubic-bezier(.2,.7,.3,1) .16s forwards}
+.fade:nth-child(3){animation-delay:.16s}
+.hero-fig{opacity:0;animation:in .8s cubic-bezier(.2,.7,.3,1) .24s forwards}
 @keyframes in{to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){
   .fade,.hero-fig{animation:none;opacity:1;transform:none}
@@ -175,7 +197,7 @@ figcaption b{color:var(--ink);font-weight:600}
 
 <header class="wrap top">
   <div class="wordmark">Dante Bonessi <span data-en="— San Rafael, Argentina" data-es="— San Rafael, Argentina">— San Rafael, Argentina</span></div>
-  <button class="langbtn" id="lang" type="button">Leer en español</button>
+  <button class="langbtn" id="lang" type="button" lang="es">Leer en español</button>
 </header>
 
 <main>
@@ -203,7 +225,7 @@ figcaption b{color:var(--ink);font-weight:600}
   </div>
 
   <figure class="hero-fig">
-    <img src="img/capas-explosion.jpg" width="742" height="701"
+    <img src="img/capas-explosion.jpg" width="742" height="701" fetchpriority="high" decoding="async"
          alt="Exploded view of a round keychain: each colour region is a separate solid stacked onto the body.">
     <figcaption class="hero-cap"
       data-en="Every colour becomes its own closed solid, each one resting on the geometry below it — never floating."
@@ -265,13 +287,13 @@ figcaption b{color:var(--ink);font-weight:600}
     <h2 data-en="What it looks like in use" data-es="Cómo se ve funcionando">What it looks like in use</h2>
     <div class="figs">
       <figure>
-        <img src="img/ui-validacion.jpg" width="1584" height="728"
+        <img src="img/ui-validacion.jpg" width="1584" height="728" loading="lazy" decoding="async"
              alt="TokenGen interface: colour layer list with per-layer heights, a live 3D preview and a warning message above the viewer.">
         <figcaption data-en="&lt;b&gt;Live editing.&lt;/b&gt; Reorder colours, set how far each one stands proud in millimetres, and see the result immediately. Warnings that change the printed part appear over the viewer, not buried in a list."
                     data-es="&lt;b&gt;Edición en vivo.&lt;/b&gt; Reordenás colores, definís cuánto sobresale cada uno en milímetros y ves el resultado al instante. Los avisos que cambian la pieza impresa aparecen sobre el visor, no enterrados en una lista."><b>Live editing.</b> Reorder colours, set how far each one stands proud in millimetres, and see the result immediately. Warnings that change the printed part appear over the viewer, not buried in a list.</figcaption>
       </figure>
       <figure>
-        <img src="img/slicer-partes.jpg" width="1600" height="856"
+        <img src="img/slicer-partes.jpg" width="1600" height="856" loading="lazy" decoding="async"
              alt="The exported 3MF opened in a slicer, showing the piece split into named parts with filaments assigned.">
         <figcaption data-en="&lt;b&gt;Straight into the slicer.&lt;/b&gt; The exported 3MF arrives as an assembly of named parts, correctly aligned, ready for filament assignment. No re-registering separate meshes by hand."
                     data-es="&lt;b&gt;Directo al slicer.&lt;/b&gt; El 3MF exportado llega como ensamblaje de partes con nombre, alineadas, listas para asignarles filamento. Sin rearmar mallas sueltas a mano."><b>Straight into the slicer.</b> The exported 3MF arrives as an assembly of named parts, correctly aligned, ready for filament assignment. No re-registering separate meshes by hand.</figcaption>
@@ -314,7 +336,7 @@ figcaption b{color:var(--ink);font-weight:600}
 <section class="band">
   <div class="wrap">
     <div class="aside">
-      <h3>HEXBOARD</h3>
+      <h2>HEXBOARD</h2>
       <p data-en="The same idea in the browser: a parametric configurator where the customer sets the dimensions and the geometry is generated live with OpenSCAD-WASM, then downloaded as a printable model. No server, no CAD seat, no designer in the loop."
          data-es="La misma idea en el navegador: un configurador paramétrico donde el cliente define las medidas y la geometría se genera en vivo con OpenSCAD-WASM, para descargarla como modelo imprimible. Sin servidor, sin licencia de CAD, sin diseñador en el medio.">The same idea in the browser: a parametric configurator where the customer sets the dimensions and the geometry is generated live with OpenSCAD-WASM, then downloaded as a printable model. No server, no CAD seat, no designer in the loop.</p>
     </div>
@@ -338,15 +360,27 @@ figcaption b{color:var(--ink);font-weight:600}
 
 <script>
 (function(){
-  var lang='en';
   var btn=document.getElementById('lang');
+  var meta=document.getElementById('metadesc');
   var nodes=document.querySelectorAll('[data-en]');
-  btn.addEventListener('click',function(){
-    lang = (lang==='en') ? 'es' : 'en';
-    document.documentElement.lang = lang;
-    nodes.forEach(function(n){ n.innerHTML = n.getAttribute('data-'+lang); });
+  var lang='en';
+
+  function apply(next){
+    lang=next;
+    document.documentElement.lang=lang;
+    nodes.forEach(function(n){ n.innerHTML=n.getAttribute('data-'+lang); });
+    if(meta) meta.setAttribute('content', meta.getAttribute('data-'+lang));
     btn.textContent = (lang==='en') ? 'Leer en español' : 'Read in English';
-  });
+    btn.lang        = (lang==='en') ? 'es' : 'en';
+    try{ localStorage.setItem('lang',lang); }catch(e){}
+  }
+
+  var saved;
+  try{ saved=localStorage.getItem('lang'); }catch(e){}
+  if(!saved && (navigator.language||'').toLowerCase().indexOf('es')===0) saved='es';
+  if(saved==='es') apply('es');
+
+  btn.addEventListener('click',function(){ apply(lang==='en'?'es':'en'); });
 })();
 </script>
 </body>
